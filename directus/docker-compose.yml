@@ -7,13 +7,11 @@ services:
       MYSQL_USER: "directus"
       MYSQL_PASSWORD: "directus"
       MYSQL_ROOT_PASSWORD: "directus"
-    ports:
-      - "33061:3306"
+    networks:
+      - directus_db
 
   directus:
     image: directus/directus:v8-apache
-    ports:
-      - "8080:80"
     environment:
       DIRECTUS_APP_ENV: "production"
       DIRECTUS_AUTH_PUBLICKEY: "some random secret"
@@ -23,8 +21,18 @@ services:
       DIRECTUS_DATABASE_NAME: "directus"
       DIRECTUS_DATABASE_USERNAME: "directus"
       DIRECTUS_DATABASE_PASSWORD: "directus"
+      VIRTUAL_HOST: "directus.bula21.ch"
+      LETSENCRYPT_HOST: "directus.bula21.ch"
+      LETSENCRYPT_EMAIL: "it-support@bula21.ch"
     volumes:
       - ./data/config:/var/directus/config
       - ./data/uploads:/var/directus/public/uploads
     links:
-      - mysql:mysql
+      - directus_db
+      - proxy_net
+
+networks:
+  proxy_net:
+    external:
+      name: proxy_net
+  directus_db:
